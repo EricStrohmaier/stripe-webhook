@@ -18,42 +18,22 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
         return;
     }
 
-    // Handle the event
-    switch (event.type) {
-        case 'payment_intent.succeeded':
-            const paymentIntentSucceeded = event.data.object;
-            console.log(paymentIntentSucceeded);
-            // Then define and call a function to handle the event payment_intent.succeeded
-            break;
-        case 'checkout.session.completed':
-            const session = event.data.object;
-            const customerId = session.customer;
+    /// Handle the checkout.session.completed event
+    if (event.type === 'checkout.session.completed') {
+        const session = event.data.object;
+        // Retrieve the chat ID from the metadata
+        const chatId = session.metadata.chat_id;
 
-            // Retrieve the chat ID from the session metadata
-            const chatId = session.metadata.chat_id;
+        // Here, you can handle the post-payment process and update your database
+        console.log(`Payment successful for chat ID: ${chatId}`);
+        // Update your database here
 
-            // Check if chatId exists and is valid
-            if (chatId) {
-                await stripe.customers.update(customerId, {
-                    metadata: { chat_id: chatId },
-                });
-            } else {
-                console.log("Chat ID not found in session metadata");
-            }
-            break;
-
-
-        case 'customer.subscription.created':
-            const subscription = event.data.object;
-            console.log(subscription);
-            break
-
-        default:
-            console.log(`Unhandled event type ${event.type}`);
+        // Respond to Stripe to acknowledge receipt of the event
+        response.json({ received: true });
+    } else {
+        // Unexpected event type
+        return response.status(400).end();
     }
-
-    // Return a 200 response to acknowledge receipt of the event
-    response.send();
 });
 
 app.listen(4242, () => console.log('Running on port 4242'));
