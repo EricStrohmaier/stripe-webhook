@@ -10,10 +10,15 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
     const sig = request.headers['stripe-signature'];
 
     let event;
-
+    const endpoint = process.env.ENDPOINT_SECRET;
+    if (!endpoint) {
+        console.log('❌ Webhook signing secret is missing');
+        return;
+    }
     try {
-        event = stripe.webhooks.constructEvent(request.body, sig, process.env.ENDPOINT_SECRET);
+        event = stripe.webhooks.constructEvent(request.body, sig, endpoint);
     } catch (err) {
+        console.error(`Error in webhook signature verification: ${err.message}`);
         response.status(400).send(`Webhook Error: ${err.message}`);
         return;
     }
