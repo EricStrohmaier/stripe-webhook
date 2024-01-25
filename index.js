@@ -90,6 +90,12 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
         return response.status(400).end();
     }
 });
+app.get('/', (request, response) => {
+    response.send('Hello from Stripe Webhook running on Vercel');
+});
+app.get('/health', (request, response) => {
+    response.send('ok');
+}); 
 
 app.listen(4242, () => console.log('Running on port 4242'));
 
