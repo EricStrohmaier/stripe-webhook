@@ -27,7 +27,7 @@ async function updateUserDetailsInDatabase(chatId, customerDetails) {
             // Record exists, update it
             const { error: updateError } = await supabase
                 .from('social_media_user_config')
-                .update({ customer_stripe_data: customerDetails})
+                .update({ customer_stripe_data: customerDetails, has_paid: true })
                 .eq('user_chat_id', chatId);
 
             if (updateError) {
